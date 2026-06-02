@@ -7,9 +7,9 @@ from plotly.subplots import make_subplots
 import folium
 from streamlit_folium import st_folium  # 关键导入
 
-st.set_page_config(page_title="气象数据下载工具LZP", layout="wide")
+st.set_page_config(page_title="气象数据下载工具", layout="wide")
 st.title("🌍 全年8760h气象数据下载工具")
-st.markdown("点击地图选择位置，获取全年逐时光资源（太阳能）和风资源数据")
+st.markdown("点击地图选择位置，获取全年逐时光资源（太阳能）和风资源数据(By LZP)")
 
 # 会话状态初始化
 if 'latitude' not in st.session_state:
@@ -119,26 +119,50 @@ def fetch_nasa_power_data(lat, lon, year=2023):
             response.raise_for_status()
             data = response.json()
             solar_data = data['properties']['parameter']['ALLSKY_SFC_SW_DWN']
-            wind_data = data['properties']['parameter']['WS50M']
+            wind_data_50m = data['properties']['parameter']['WS50M']
             timestamps = list(solar_data.keys())
+            # ============ 新增：将50米风速转换为100米风速 ============
+            # 使用风切变指数公式：V100 = V50 * (100/50)^α
+            alpha = 0.14  # 风切变指数（适用于开阔地形）
+            H1 = 50  # 原始高度（米）
+            H2 = 100  # 目标高度（米）
+
+            # 计算转换系数
+            wind_factor = (H2 / H1) ** alpha  # (100/50)^0.14 = 2^0.14 ≈ 1.102
+
+            # 转换为100米风速
+            wind_data_100m = [w * wind_factor for w in wind_data_50m.values()]
+
+            # 创建DataFrame
             df = pd.DataFrame({
                 '时间': timestamps,
                 '光资源_Wm2': list(solar_data.values()),
-                '风资源_ms': list(wind_data.values())
+                '风资源_ms': wind_data_100m  # 使用100米风速
             })
+
             df['datetime'] = pd.to_datetime(df['时间'], format='%Y%m%d%H')
             df['时间格式化'] = df['datetime'].dt.strftime('%Y%m%d%H')
-            df['光资源_Wm2'] = df['光资源_Wm2']    # 转换为 W/m²
+
+            # 光资源单位转换（kW-hr/m²/hour → W/m²）
+            df['光资源_Wm2'] = df['光资源_Wm2'] * 1
+
             expected_hours = 8760 if (year % 4 != 0) else 8784
             actual_hours = len(df)
-            st.info(f"数据获取完成！实际获取 {actual_hours} 小时数据 (预期 {expected_hours} 小时)")
+
+            # 显示转换信息
+            st.info(f"✅ 数据获取完成！实际获取 {actual_hours} 小时数据")
+            st.info(f"🌬️ 风速已从50米高度转换为100米高度（转换系数: {wind_factor:.3f}）")
+
+            # 处理缺失值
             missing_solar = df['光资源_Wm2'].isna().sum()
             missing_wind = df['风资源_ms'].isna().sum()
             if missing_solar > 0 or missing_wind > 0:
                 st.warning(f"数据中存在缺失值: 光资源缺失{missing_solar}小时, 风资源缺失{missing_wind}小时")
                 df['光资源_Wm2'] = df['光资源_Wm2'].fillna(method='ffill')
                 df['风资源_ms'] = df['风资源_ms'].fillna(method='ffill')
+
             return df
+
         except Exception as e:
             st.error(f"数据获取失败: {e}")
             return None
@@ -274,12 +298,13 @@ if st.session_state.weather_data is not None:
         secondary_y=False
     )
     fig.add_trace(
-        go.Scatter(x=sampled_df['datetime'], y=sampled_df['风资源_ms'], name="风资源 (风速)",
+        go.Scatter(x=sampled_df['datetime'], y=sampled_df['风资源_ms'],
+                   name="风资源 (风速 @ 100m)",  # 标注100米
                    line=dict(color='skyblue', width=1), opacity=0.8),
         secondary_y=True
     )
     fig.update_layout(
-        title=f"{st.session_state.latitude:.4f}°N, {st.session_state.longitude:.4f}°E 位置2023年全年气象数据",
+        title=f"{st.session_state.latitude:.4f}°N, {st.session_state.longitude:.4f}°E 位置2023年全年气象数据（风速已转换至100米高度）",
         xaxis_title="时间", hovermode='x unified',
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
         height=500
@@ -358,6 +383,7 @@ if st.session_state.weather_data is not None:
         st.dataframe(export_df, use_container_width=True, height=400)
 
 st.divider()
-st.caption("数据来源: NASA POWER (Prediction Of Worldwide Energy Resources) API")
+#st.caption("数据来源: NASA POWER (Prediction Of Worldwide Energy Resources) API")
 st.caption("光资源参数: ALLSKY_SFC_SW_DWN (地表接收的总太阳辐射, 全天空条件下)")
-st.caption("风资源参数: WS50M (50米高度风速)")
+st.caption("风资源参数: WS50M (50米高度原始数据) → 已转换为100米高度风速")
+st.caption(f"风切变指数: α = 0.14 (适用于开阔地形)，转换系数 = (100/50)^{0.14} = {((100/50)**0.14):.3f}")
