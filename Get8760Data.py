@@ -349,7 +349,7 @@ if st.session_state.weather_data is not None:
     st.download_button(
         label="📥 下载 Excel 文件",
         data=excel_data,
-        file_name=f"nasa_weather_{st.session_state.latitude:.4f}_{st.session_state.longitude:.4f}_2023.xlsx",
+        file_name=f"Weather_{st.session_state.latitude:.4f}_{st.session_state.longitude:.4f}_2023_ZP.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         use_container_width=True
     )
