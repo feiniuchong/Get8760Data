@@ -7,9 +7,9 @@ from plotly.subplots import make_subplots
 import folium
 from streamlit_folium import st_folium  # 关键导入
 
-st.set_page_config(page_title="NASA气象数据下载工具", layout="wide")
+st.set_page_config(page_title="气象数据下载工具LZP", layout="wide")
 st.title("🌍 全年8760h气象数据下载工具")
-st.markdown("点击地图选择位置，获取2023年全年逐时光资源（太阳能）和风资源数据")
+st.markdown("点击地图选择位置，获取全年逐时光资源（太阳能）和风资源数据")
 
 # 会话状态初始化
 if 'latitude' not in st.session_state:
