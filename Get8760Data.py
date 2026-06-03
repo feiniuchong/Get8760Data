@@ -1,4 +1,52 @@
 import streamlit as st
+import hashlib
+
+# ============ 登录验证配置 ============
+# 设置用户名和密码（建议修改成你自己的）
+VALID_USERNAME = "1276"
+# 密码使用SHA256加密存储（实际密码是 "123456"）
+VALID_PASSWORD_HASH = hashlib.sha256("1276".encode()).hexdigest()
+
+
+def check_password():
+    """验证用户登录"""
+
+    # 如果已经登录，直接返回True
+    if st.session_state.get("authenticated", False):
+        return True
+
+    # 显示登录表单
+    st.title("🔐 用户登录")
+    st.write("请输入用户名和密码")
+
+    with st.form("login_form"):
+        username = st.text_input("用户名", placeholder="请输入用户名")
+        password = st.text_input("密码", type="password", placeholder="请输入密码")
+        submit = st.form_submit_button("登录")
+
+    # 验证逻辑
+    if submit:
+        # 加密输入的密码
+        password_hash = hashlib.sha256(password.encode()).hexdigest()
+
+        if username == VALID_USERNAME and password_hash == VALID_PASSWORD_HASH:
+            st.session_state.authenticated = True
+            st.success("✅ 登录成功！正在跳转...")
+            st.rerun()
+        else:
+            st.error("❌ 用户名或密码错误，请重试！")
+            return False
+
+    return False
+
+
+# 执行登录验证（放在所有代码之前）
+if not check_password():
+    st.stop()  # 如果未登录，停止后续代码执行
+
+# ============ 以下是原有的所有代码 ============
+
+import streamlit as st
 import pandas as pd
 import requests
 from datetime import datetime
