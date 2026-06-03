@@ -56,6 +56,16 @@ import folium
 from streamlit_folium import st_folium  # 关键导入
 
 st.set_page_config(page_title="气象数据下载工具", layout="wide")
+
+# 隐藏右上角的菜单和GitHub图标
+hide_streamlit_style = """
+<style>
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+</style>
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 st.title("🌍 全年8760h气象数据简要分析及下载工具")
 st.markdown("点击地图选择位置，获取全年逐时光资源（太阳能）和风资源数据(By Lzp 2026.06)")
 
