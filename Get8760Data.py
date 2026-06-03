@@ -92,7 +92,7 @@ if 'weather_data' not in st.session_state:
 col1, col2 = st.columns([2, 1])
 
 with col1:
-    st.subheader("🗺️ 点击地图选择位置")
+    st.subheader("🗺️ 点击地图选择位置或者右侧输入经纬度")
 
     # 创建地图，使用 session_state 中的坐标
     #这个地图是openstreet
