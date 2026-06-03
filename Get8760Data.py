@@ -2,6 +2,17 @@ import streamlit as st
 import hashlib
 
 # ============ 登录验证配置 ============
+
+# 隐藏右上角的菜单和GitHub图标
+hide_streamlit_style = """
+<style>
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+</style>
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
 # 设置用户名和密码（建议修改成你自己的）
 VALID_USERNAME = "1276"
 # 密码使用SHA256加密存储（实际密码是 "123456"）
