@@ -2,7 +2,7 @@ import streamlit as st
 import hashlib
 
 # ============ 登录验证配置 ============
-st.set_page_config(page_title="气象数据下载工具", layout="wide")
+st.set_page_config(page_title="风光资源获取及分析", layout="wide")
 # 隐藏右上角的菜单和GitHub图标
 hide_streamlit_style = """
 <style>
@@ -66,7 +66,7 @@ from plotly.subplots import make_subplots
 import folium
 from streamlit_folium import st_folium  # 关键导入
 
-st.set_page_config(page_title="气象数据下载工具", layout="wide")
+st.set_page_config(page_title="风光资源获取及分析", layout="wide")
 
 # 隐藏右上角的菜单和GitHub图标
 hide_streamlit_style = """
