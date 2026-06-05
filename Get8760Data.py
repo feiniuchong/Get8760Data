@@ -2,7 +2,7 @@ import streamlit as st
 import hashlib
 
 # ============ 登录验证配置 ============
-
+st.set_page_config(page_title="气象数据下载工具", layout="wide")
 # 隐藏右上角的菜单和GitHub图标
 hide_streamlit_style = """
 <style>
