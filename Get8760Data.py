@@ -15,7 +15,7 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # 设置用户名和密码（建议修改成你自己的）
 VALID_USERNAME = "1276"
-# 密码使用SHA256加密存储（实际密码是 "1276"）
+# 密码使用SHA256加密存储（实际密码是 "123456"）
 VALID_PASSWORD_HASH = hashlib.sha256("1276".encode()).hexdigest()
 
 
@@ -87,52 +87,6 @@ if 'longitude' not in st.session_state:
     st.session_state.longitude = 118.8
 if 'weather_data' not in st.session_state:
     st.session_state.weather_data = None
-if 'map_source' not in st.session_state:
-    st.session_state.map_source = "高德地图"
-
-# ============ 地图源配置 ============
-MAP_SOURCES = {
-    "高德地图": {
-        "tiles": "https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=7&x={x}&y={y}&z={z}",
-        "attr": '© <a href="https://www.gaode.com/">高德地图</a>',
-        "subdomains": "1234"
-    },
-    "高德卫星": {
-        "tiles": "https://webst0{s}.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}",
-        "attr": '© <a href="https://www.gaode.com/">高德地图</a>',
-        "subdomains": "1234"
-    },
-    "OpenStreetMap": {
-        "tiles": "OpenStreetMap",
-        "attr": "© OpenStreetMap contributors",
-        "subdomains": None
-    },
-    "CartoDB 浅色": {
-        "tiles": "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
-        "attr": '© OpenStreetMap contributors © CARTO',
-        "subdomains": "abcd"
-    },
-    "CartoDB 深色": {
-        "tiles": "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-        "attr": '© OpenStreetMap contributors © CARTO',
-        "subdomains": "abcd"
-    },
-    "CartoDB 地形": {
-        "tiles": "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-        "attr": '© OpenStreetMap contributors © CARTO',
-        "subdomains": "abcd"
-    },
-    "Esri 卫星": {
-        "tiles": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-        "attr": "Tiles © Esri",
-        "subdomains": None
-    },
-    "OpenTopoMap 地形": {
-        "tiles": "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
-        "attr": '© OpenStreetMap contributors, SRTM | © OpenTopoMap',
-        "subdomains": "abc"
-    }
-}
 
 # 布局：左侧地图，右侧控制面板
 col1, col2 = st.columns([2, 1])
@@ -140,20 +94,16 @@ col1, col2 = st.columns([2, 1])
 with col1:
     st.subheader("🗺️ 点击地图选择位置或者右侧输入经纬度")
 
-    # 创建地图，使用 session_state 中的坐标和选定的地图源
-    source_config = MAP_SOURCES[st.session_state.map_source]
-
-    map_kwargs = {
-        "location": [st.session_state.latitude, st.session_state.longitude],
-        "zoom_start": 8,
-        "tiles": source_config["tiles"],
-        "attr": source_config["attr"],
-    }
-    if source_config["subdomains"]:
-        map_kwargs["subdomains"] = source_config["subdomains"]
-
-    m = folium.Map(**map_kwargs)
-
+    # 创建地图，使用 session_state 中的坐标
+    #这个地图是openstreet
+    # m = folium.Map(location=[st.session_state.latitude, st.session_state.longitude], zoom_start=6)
+    #改为高德地图
+    m = folium.Map(
+        location=[st.session_state.latitude, st.session_state.longitude],
+        zoom_start=8,
+        tiles='http://webrd01.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=7&x={x}&y={y}&z={z}',
+        attr='© <a href="http://www.gaode.com/">高德地图</a>'
+    )
     folium.Marker(
         [st.session_state.latitude, st.session_state.longitude],
         popup=f"选中点: ({st.session_state.latitude:.4f}, {st.session_state.longitude:.4f})",
@@ -179,15 +129,6 @@ with col1:
 
 with col2:
     st.subheader("📍 位置设置")
-
-    # ============ 新增：地图源选择 ============
-    st.selectbox(
-        "🗺️ 地图源",
-        options=list(MAP_SOURCES.keys()),
-        key="map_source",
-        help="切换地图底图样式。如果某个地图无法显示，请换其他地图源。"
-    )
-    # ========================================
 
     # 使用 key 绑定，值会自动同步
     st.number_input(
