@@ -101,7 +101,7 @@ with col1:
     m = folium.Map(
         location=[st.session_state.latitude, st.session_state.longitude],
         zoom_start=8,
-        tiles='http://webrd01.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=7&x={x}&y={y}&z={z}',
+        tiles='https://webrd01.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=7&x={x}&y={y}&z={z}',
         attr='© <a href="http://www.gaode.com/">高德地图</a>'
     )
     folium.Marker(
